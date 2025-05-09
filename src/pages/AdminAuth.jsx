@@ -32,7 +32,7 @@ const AdminAuth = () => {
       return toast.error('Check your email!')
     }
     const { password, role } = user;
-    if ( password && role && rememberMe) {
+    if ( password && role ) {
       sessionStorage.setItem('user', JSON.stringify(user))
       toast.success('Login success');
       navigate('/admin/dashboard');
