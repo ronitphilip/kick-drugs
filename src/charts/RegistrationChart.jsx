@@ -11,7 +11,7 @@ const RegistrationChart = () => {
   const COLORS = data.map(item => item.color);
 
   return (
-    <div className="p-6 h-full">
+    <div className="md:p-6 sm:p-0 h-full">
       <h2 className="text-2xl font-semibold text-green-700 mb-4 text-center">Registration Category</h2>
       
       <div className="h-64">

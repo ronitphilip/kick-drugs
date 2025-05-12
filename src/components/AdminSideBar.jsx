@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutGrid, Lightbulb, Package, FileText,
-  Link, MessageSquare, Download, User, Settings, LogOut
+  Link, MessageSquare, Download, User, Settings, LogOut, Menu, X
 } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const AdminSideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const currentPath = location.pathname.split('/').pop();
 
@@ -34,7 +35,12 @@ const AdminSideBar = () => {
       navigate('/');
     } else {
       navigate(`/admin/${item.path}`);
+      setIsSidebarOpen(false);
     }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const renderNavItem = (item) => {
@@ -54,18 +60,39 @@ const AdminSideBar = () => {
   };
 
   return (
-    <div className="h-screen bg-yellow-50 w-64 flex flex-col justify-between shadow-md">
-      <div className="p-4">
-        <div className="pb-10 p-4">
-          <img src={logo} alt="Kick Drugs Logo" className="h-12" />
+    <>
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 text-gray-700 focus:outline-none"
+        onClick={toggleSidebar}
+        aria-label="Toggle sidebar"
+      >
+        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-yellow-50 flex flex-col justify-between shadow-md transform transition-transform duration-300 ease-in-out z-40 md:translate-x-0 ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:static md:w-64`}
+      >
+        <div className="p-4">
+          <div className="pb-10 p-4">
+            <img src={logo} alt="Kick Drugs Logo" className="h-10 md:h-12" />
+          </div>
+          <nav className="space-y-2">{menuItems.map(renderNavItem)}</nav>
         </div>
-        <nav className="space-y-2">{menuItems.map(renderNavItem)}</nav>
+        <div className="px-4 py-4">
+          <nav className="space-y-2">{bottomItems.map(renderNavItem)}</nav>
+          <p className="text-center italic text-gray-600 text-xs mt-4">ver 1.21</p>
+        </div>
       </div>
-      <div className="px-4 py-4">
-        <nav className="space-y-2">{bottomItems.map(renderNavItem)}</nav>
-        <p className='text-center italic text-gray-600 pb-3'>ver 1.21</p>
-      </div>
-    </div>
+
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={toggleSidebar}
+        ></div>
+      )}
+    </>
   );
 };
 
