@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import NavBar from '../components/NavBar'
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import {loginAPI} from '../services/allApi'
 
 const AdminAuth = () => {
 
@@ -27,17 +28,25 @@ const AdminAuth = () => {
     setEmailError(emailPattern.test(val) ? '' : 'Invalid email format');
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if(emailError){
       return toast.error('Check your email!')
     }
-    const { password, role } = user;
-    if ( password && role ) {
-      sessionStorage.setItem('user', JSON.stringify(user))
-      toast.success('Login success');
-      navigate('/admin/dashboard');
-    } else {
-      toast.error('Please fill all fields.');
+    if ( !user?.password ) {
+     return  toast.error('Please enter your password')
+    }
+
+    try {
+      const result = await loginAPI(user);
+      if(result.status === 200){
+        toast.success('Login success!')
+        sessionStorage.setItem('user',JSON.stringify(result?.data?.user));
+        sessionStorage.setItem('token', result?.data?.token);
+        navigate('/admin/dashboard')
+      }
+    } catch (error) {
+      toast.error('Soemthing went wrong!');
+      console.log(error);
     }
   };
 
@@ -85,7 +94,7 @@ const AdminAuth = () => {
                 <ul className="absolute z-10 w-full bg-white border border-gray-200 mt-1 rounded-md shadow-md">
                   {categories.map((item) => (
                     <li
-                      key={item}
+                      key={item.toLowerCase()}
                       onClick={() => {
                         setUser({...user, role: item});
                         setShowDropdown(false);

@@ -8,7 +8,7 @@ const AdminNav = () => {
     return (
         <div className='flex justify-between'>
             <div>
-                <h1 className='text-3xl font-bold'>Hi {user?.email.split('@')[0] || 'User'}!</h1>
+                <h1 className='text-3xl font-bold'>Hi {user?.name.split(' ')[0] || 'User'}!</h1>
             </div>
             <div className="flex items-center">
                 <div className='flex items-center space-x-4'>

@@ -4,15 +4,16 @@ import AdminNav from '../components/AdminNav'
 import IDCardPreview from '../components/IDCardPreview'
 import toast from 'react-hot-toast';
 import { ChevronDown, Upload } from 'lucide-react';
+import { registerAPI } from '../services/allApi';
 
 const AdminProfile = () => {
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     image: null,
     dateOfBirth: '',
     phoneNumber: '',
-    emailId: '',
+    email: '',
     district: '',
     panchayat: ''
   });
@@ -29,6 +30,10 @@ const AdminProfile = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error('Image size must be less than 1MB!');
+        return;
+      }
       setFormData(prev => ({
         ...prev,
         image: file
@@ -42,25 +47,56 @@ const AdminProfile = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const { fullName, image, dateOfBirth, phoneNumber, emailId, district, panchayat } = formData;
+    const { name, image, dateOfBirth, phoneNumber, email, district, panchayat } = formData;
 
-    if (!fullName || !image || !dateOfBirth || !phoneNumber || !emailId || !district || !panchayat) {
-      toast.error('Please fill the form completely!')
-    } else {
-      toast.success('Form submitted!')
-      console.log(formData);
-      setFormData({
-        fullName: '',
-        image: null,
-        dateOfBirth: '',
-        phoneNumber: '',
-        emailId: '',
-        district: '',
-        panchayat: ''
-      })
+    if (!name || !image || !dateOfBirth || !phoneNumber || !email || !district || !panchayat) {
+      return toast.error('Please fill the form completely!');
     }
+
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      return toast.error('Token not found!')
+    }
+    
+    const header = {
+      Authorization: `Bearer ${token}`
+    };
+
+    const userData = new FormData();
+    userData.append('name', name);
+    userData.append('image', image);
+    userData.append('dateOfBirth', dateOfBirth);
+    userData.append('phoneNumber', phoneNumber);
+    userData.append('email', email);
+    userData.append('district', district);
+    userData.append('panchayat', panchayat);
+
+    try {
+      const result = await registerAPI(userData, header);
+      if (result.status === 200) {
+        toast.success('Profile registered successfully!');
+
+        setFormData({
+          name: '',
+          image: null,
+          dateOfBirth: '',
+          phoneNumber: '',
+          email: '',
+          district: '',
+          panchayat: ''
+        });
+        setImagePreview(null);
+      } else {
+        toast.error('Registration failed!');
+      }
+    } catch (err) {
+      toast.error('Something went wrong!');
+      console.log(err);
+    }
+
   };
 
   return (
@@ -69,7 +105,7 @@ const AdminProfile = () => {
       <div className='col-span-5 px-8 pt-2'>
         <AdminNav />
         <p className='text-sm'>Kindly fill your details and make the complete.</p>
-        <div className='border-2 border-green-500 bg-green-50 rounded-xl grid grid-cols-2 gap-4 mt-8'>
+        <div className='border-2 border-green-500 bg-green-50 rounded-xl grid grid-cols-2 gap-4 mt-4'>
           <form className='py-5 px-8 space-y-4' onSubmit={handleSubmit}>
             <div>
               <label className="block text-gray-700 mb-1 font-bold">
@@ -77,8 +113,8 @@ const AdminProfile = () => {
               </label>
               <input
                 type="text"
-                name="fullName"
-                value={formData.fullName}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Type Text here"
                 className="w-full p-2 border border-gray-300 rounded bg-white"
@@ -148,8 +184,8 @@ const AdminProfile = () => {
               </label>
               <input
                 type="email"
-                name="emailId"
-                value={formData.emailId}
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter Email"
                 className="w-full p-2 border border-gray-300 rounded bg-white"
@@ -210,7 +246,7 @@ const AdminProfile = () => {
             <div className="p-10">
               <div className='border-2 border-green-500 rounded-xl p-5'>
                 <IDCardPreview
-                  fullName={formData.fullName}
+                  name={formData.name}
                   district={formData.district}
                   panchayat={formData.panchayat}
                   image={imagePreview}

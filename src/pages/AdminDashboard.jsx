@@ -1,13 +1,10 @@
 import React from 'react'
 import AdminSideBar from '../components/AdminSideBar'
-import { Bell, ChevronDown, User } from 'lucide-react'
 import GenderChart from '../charts/GenderChart'
 import RegistrationChart from '../charts/RegistrationChart'
 import AdminNav from '../components/AdminNav'
 
 const AdminDashboard = () => {
-
-  const user = JSON.parse(sessionStorage.getItem('user'))
 
   return (
     <div className='grid grid-cols-6'>
